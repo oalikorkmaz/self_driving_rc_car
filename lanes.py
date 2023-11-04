@@ -23,21 +23,10 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
-    if len(left_fit) > 0:
-        left_fit_average = np.average(left_fit, axis=0)
-        left_line = make_coordinates(image, left_fit_average)
-    else:
-        left_line = None
-
-    if len(right_fit) > 0:
-        right_fit_average = np.average(right_fit, axis=0)
-        right_line = make_coordinates(image, right_fit_average)
-    else:
-        right_line = None
-    # left_fit_average = np.average(left_fit, axis=0)
-    # right_fit_average = np.average(right_fit, axis=0)
-    # left_line = make_coordinates(image, left_fit_average)
-    # right_line = make_coordinates(image, right_fit_average)
+    left_fit_average = np.average(left_fit, axis=0)
+    right_fit_average = np.average(right_fit, axis=0)
+    left_line = make_coordinates(image, left_fit_average)
+    right_line = make_coordinates(image, right_fit_average)
     return np.array([left_line, right_line])
 
 
