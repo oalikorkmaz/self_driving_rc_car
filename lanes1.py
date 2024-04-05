@@ -68,7 +68,8 @@ def display_lines(image, lines):
     return line_image
 
 def region_of_interest(image):
-    vertices = np.array([[(0, 300), (1280, 300), (1280, 720), (0, 720)]], dtype=np.int32)
+    vertices = np.array([[(0, 390), (1280, 390), (1280, 720), (0, 720)]], dtype=np.int32)
+
     # ROI için boş bir maske oluşturma
     mask = np.zeros_like(image)
     
@@ -90,14 +91,14 @@ def region_of_interest(image):
 # averaged_line = average_slope_intercept(lane_image, lines)
 # line_image = display_lines(lane_image, averaged_line)
 # combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
-# # plt.imshow(canny_image)
+# # plt.imshow(combo_image)
 # # plt.show() 
 
 # cv2.imshow("result", combo_image)
 # cv2.waitKey(0)
 
 
-cap = cv2.VideoCapture("utils/video/test_video.mp4")
+cap = cv2.VideoCapture("utils/video/test_video2.mp4")
 
 while(cap.isOpened()):
      _, frame = cap.read()
