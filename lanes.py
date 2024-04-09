@@ -78,9 +78,7 @@ def average_slope_intercept(image, lines):
     return lane_lines
 
 def make_coordinates(image, line_parameters):
-    slope = line_parameters[0]
-    intercept = line_parameters[1]
-
+    slope, intercept = line_parameters
     height = image.shape[0]
     width = image.shape[1]
 
@@ -132,15 +130,17 @@ def canny(image, show=False):
     return canny
 
 def display_lines(image, lines):
-
-    line_color = (255, 0, 0)
-    line_width = 5
-    
-    for line in lines:
-        for x1, y1, x2, y2 in line:
-            cv2.line(image, (x1, y1), (x2, y2), line_color, line_width)
-    
+    try:
+        line_color = (255, 0, 0)
+        line_width = 5
+        
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                cv2.line(image, (x1, y1), (x2, y2), line_color, line_width)
+    except:
+        print("none lines")    
     return image
+    
 
     
 
@@ -236,7 +236,7 @@ def lane_search_area(img, boundary = 1/2):
 
 
 sh = False
-video = False
+video = True
 
 # RESİM BAŞLANGIÇ
 if video == False:
@@ -247,24 +247,19 @@ if video == False:
     canny_image = canny(image_masked, show=sh)
     cropped_image = region_of_interest(canny_image, show=sh)
     lines = detect_lines(cropped_image)
-    line_image = display_lines(lane_image, lines)
-    
     averaged_line = average_slope_intercept(lane_image, lines)
     print("LANE : " , averaged_line)
+    line_image = display_lines(lane_image, averaged_line)
     #lane_search_area(lane_image, boundary=1/3)
-
-    
-    steering = steering_angle(lane_image, averaged_line, show= True)
-    print(steering)
+    steering = steering_angle(lane_image, averaged_line, show=True)
+    print("Teker Açısı: ", steering)
     
     combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
     
     # plt.imshow(combo_image)
     # plt.show() 
 
-   
     # ROI bölgesini çizme
-    
     if sh == True:
         vertices = np.array([[(0, 480),(0, 381), (215, 216), (421, 216), (620, 478)]], dtype=np.int32)
         cv2.polylines(combo_image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
@@ -279,18 +274,21 @@ else:
     cap = cv2.VideoCapture("utils/video/test_video.mp4")
 
     while(cap.isOpened()):
-         _, frame = cap.read()
-         canny_image = canny(frame)
-         cropped_image = region_of_interest(canny_image)
-         lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5)
+        _, frame = cap.read()
+        frame = cv2.resize(frame, (640, 480))
+        frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        frame_masked = masked_image(frame_hsv, show= sh)
+        canny_frame = canny(frame_masked, show= sh)
+        cropped_frame = region_of_interest(canny_frame, show=sh)
+        lines = detect_lines(cropped_frame)
+        averaged_line = average_slope_intercept(frame, lines)
+        line_frame = display_lines(frame, averaged_line)
     
-         if lines is not None:
-             averaged_line = average_slope_intercept(frame, lines)
-             line_image = display_lines(frame, averaged_line)
-             combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
-             cv2.imshow("result", combo_image)
-             if cv2.waitKey(1) & 0xFF == ord('q'):
-                 break
-             time.sleep(0.1)
-         else:
-             print("Lines not found!")
+        steering = steering_angle(frame, averaged_line, show= False)
+        print("Teker Açısı: ", steering)
+        combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+        cv2.imshow("combo_frame", combo_frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        time.sleep(0.1)
+        
