@@ -42,7 +42,7 @@ def average_slope_intercept(image, lines):
             """
             y ekseninin görüntü matrisinde ters çevrildiğine dikkat edin. 
             böylece x (genişlik) arttıkça, y (yükseklik) değerleri azalır
-            Bu nedenle sağ nane eğimi pozitif, sol nane eğimi ise negatiftir.
+            Bu nedenle sağ çizgi eğimi pozitif, sol çizgi eğimi ise negatiftir.
             """
 
 
@@ -81,7 +81,7 @@ def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
     height = image.shape[0]
     width = image.shape[1]
-
+    
     
     
     #      sol        sağ
@@ -130,23 +130,23 @@ def canny(image, show=False):
     return canny
 
 def display_lines(image, lines):
-    try:
-        line_color = (255, 0, 0)
-        line_width = 5
+    
+    line_color = (255, 0, 0)
+    line_width = 5
+    
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            cv2.line(image, (x1, y1), (x2, y2), line_color, line_width)
         
-        for line in lines:
-            for x1, y1, x2, y2 in line:
-                cv2.line(image, (x1, y1), (x2, y2), line_color, line_width)
-    except:
-        print("none lines")    
     return image
     
 
     
 
 def region_of_interest(image, show=False):
-    # 1. Nokta: x=0, y=381 -> 2. Nokta: x=230, y=216 -> 3. Nokta: x=421, y=216 -> 4. Nokta: x=620, y=478
-    vertices = np.array([[(0, 470), (0, 381), (230, 216), (421, 216), (620, 478)]], dtype=np.int32)
+    # 1. Nokta: x=0, y=470 -> 2. Nokta: x=0, y=381 -> 3. Nokta: x=230, y=216 -> 4. Nokta: x=421, y=216 -> 5. Nokta: x=620, y=478
+    # 1. Nokta: x=25, y=360 -> 2. Nokta x=160, y=261 -> 3. Nokta x=460, y=261 -> 4. Nokta: x=540, y=360
+    vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
     # ROI için boş bir maske oluşturma
     mask = np.zeros_like(image)
     
@@ -251,7 +251,7 @@ if video == False:
     print("LANE : " , averaged_line)
     line_image = display_lines(lane_image, averaged_line)
     #lane_search_area(lane_image, boundary=1/3)
-    steering = steering_angle(lane_image, averaged_line, show=True)
+    steering = steering_angle(lane_image, averaged_line, show=False)
     print("Teker Açısı: ", steering)
     
     combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
@@ -260,8 +260,8 @@ if video == False:
     # plt.show() 
 
     # ROI bölgesini çizme
-    if sh == True:
-        vertices = np.array([[(0, 480),(0, 381), (215, 216), (421, 216), (620, 478)]], dtype=np.int32)
+    if sh == False:
+        vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
         cv2.polylines(combo_image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
     
     cv2.imshow("combo_image", combo_image)
