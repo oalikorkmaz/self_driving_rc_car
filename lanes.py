@@ -146,7 +146,8 @@ def display_lines(image, lines):
 def region_of_interest(image, show=False):
     # 1. Nokta: x=0, y=470 -> 2. Nokta: x=0, y=381 -> 3. Nokta: x=230, y=216 -> 4. Nokta: x=421, y=216 -> 5. Nokta: x=620, y=478
     # 1. Nokta: x=25, y=360 -> 2. Nokta x=160, y=261 -> 3. Nokta x=460, y=261 -> 4. Nokta: x=540, y=360
-    vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
+    #vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
+    vertices = np.array([[(0, 382), (169, 236), (450, 236), (560, 382)]], dtype=np.int32)
     # ROI için boş bir maske oluşturma
     mask = np.zeros_like(image)
     
@@ -220,7 +221,7 @@ def steering_angle(image, lane, show=False):
 
 # Gruplama alanlarını görsel olarak görme [hata ayıklama için]
 def lane_search_area(img, boundary = 1/2):
-    height = img.shape[0] - 53
+    height = img.shape[0]
     width = img.shape[1]
     left_lane_area_width = int(width * (1 - boundary))
     right_lane_area_width = int(width * boundary)
@@ -236,7 +237,7 @@ def lane_search_area(img, boundary = 1/2):
 
 
 sh = False
-video = True
+video = False
 
 # RESİM BAŞLANGIÇ
 if video == False:
@@ -256,12 +257,13 @@ if video == False:
     
     combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
     
-    # plt.imshow(combo_image)
-    # plt.show() 
+    plt.imshow(combo_image)
+    plt.show() 
 
     # ROI bölgesini çizme
     if sh == False:
-        vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
+        vertices = np.array([[(0, 382), (169, 236), (450, 236), (560, 382)]], dtype=np.int32)
+        #vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
         cv2.polylines(combo_image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
     
     cv2.imshow("combo_image", combo_image)
