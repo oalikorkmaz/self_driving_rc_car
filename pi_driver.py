@@ -2,8 +2,16 @@ from lanes import *
 import cv2
 import RPi.GPIO as GPIO
 import pigpio
+from picamera2 import Picamera2
 
 
+
+picam2 = Picamera2()
+picam2.preview_configuration.main.size = (1920,1080)
+picam2.preview_configuration.main.format = "RGB888"
+picam2.preview_configuration.align()
+picam2.configure("preview")
+picam2.start()
 
 # motor sürücü pinleri
 Ena = 26
@@ -55,13 +63,11 @@ steering_factor = 1
 
 def main():
     th = 0
-    cam = cv2.VideoCapture("utils/video/test_video.mp4")
 
     while True:
-        ret, frame = cam.read()
-        if not ret:
-            break
-        frame = cv2.resize(frame, (640, 480))
+        cam = picam2.capture_array()
+
+        frame = cv2.resize(cam, (640, 480))
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # hata ayıklama için değer
         sh = False
@@ -73,15 +79,18 @@ def main():
         frame_canny = canny(frame_masked, sh)
 
         #İlgi alanını belirleme (ROI)
-        frame_cropped = region_of_interest(canny_frame, sh)
+        frame_cropped = region_of_interest(frame_canny, sh)
 
         #Şeritleri algılama
-        lines = detect_lines(cropped_frame)
-
+        lines = detect_lines(frame_cropped)
+    
         #Şeritlerin sol ve sağ da gruplanması
         averaged_line = average_slope_intercept(frame, lines)
+        line_frame = display_lines(frame, averaged_line)
 
         steering_input_raw = steering_angle(frame, averaged_line, show=sh)
+        combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+        cv2.imshow('Result', combo_frame)
         print("Steering Input Raw", int(steering_input_raw))
 
         #Kalibre etme
@@ -131,6 +140,11 @@ def main():
 
         # Nihai değerlerin atanması
         pwm.set_servo_pulsewidth(servo, st)
+        if throttle_input < 0:
+            throttle_input = 0
+        if throttle_input > 100:
+            throttle_input = 100
+            
         pwmA.ChangeDutyCycle(int(throttle_input))
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
