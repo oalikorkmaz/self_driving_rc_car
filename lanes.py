@@ -146,7 +146,7 @@ def display_lines(image, lines):
 def region_of_interest(image, show=False):
     # 1. Nokta: x=0, y=470 -> 2. Nokta: x=0, y=381 -> 3. Nokta: x=230, y=216 -> 4. Nokta: x=421, y=216 -> 5. Nokta: x=620, y=478
     # 1. Nokta: x=25, y=360 -> 2. Nokta x=160, y=261 -> 3. Nokta x=460, y=261 -> 4. Nokta: x=540, y=360
-    vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
+    vertices = np.array([[(0, 240), (108, 100), (555, 100), (640, 248)]], dtype=np.int32)
     # ROI için boş bir maske oluşturma
     mask = np.zeros_like(image)
     
@@ -219,33 +219,54 @@ def steering_angle(image, lane, show=False):
     return angle_to_middle_vertical_deg
 
 # Gruplama alanlarını görsel olarak görme [hata ayıklama için]
-def lane_search_area(img, boundary = 1/2):
-    height = img.shape[0] - 53
-    width = img.shape[1]
+def lane_search_area(image, boundary = 1/2):
+    height = image.shape[0] - 53
+    width = image.shape[1]
     left_lane_area_width = int(width * (1 - boundary))
     right_lane_area_width = int(width * boundary)
-    # left_region = np.zeros_like(img)
-    # right_region = np.zeros_like(img)
+    # left_region = np.zeros_like(image)
+    # right_region = np.zeros_like(image)
 
-    cv2.rectangle(img, (0, 0), (left_lane_area_width, height), (0, 244, 233), 5) 
-    cv2.rectangle(img, (right_lane_area_width, 0), (width, height), (128, 0, 0), 5) 
+    cv2.rectangle(image, (0, 0), (left_lane_area_width, height), (0, 244, 233), 5) 
+    cv2.rectangle(image, (right_lane_area_width, 0), (width, height), (128, 0, 0), 5) 
     vertices = np.array([[(0, 480),(0, 381), (215, 216), (421, 216), (620, 478)]], dtype=np.int32)
-    cv2.polylines(img, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
+    cv2.polylines(image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
 
-    cv2.imshow("left and right region", img)
+    cv2.imshow("left and right region", image)
 
+def perspective_transform(image, show= False):
+    top_left = [108, 100]
+    bottom_left = [0, 240]
+    top_right = [555, 100]
+    bottom_right = [640, 248]
 
-sh = False
+    cv2.circle(image, top_left, 5, (0,0,255), -1)
+    cv2.circle(image, bottom_left, 5, (0,0,255), -1)
+    cv2.circle(image, top_right, 5, (0,0,255), -1)
+    cv2.circle(image, bottom_right, 5, (0,0,255), -1)
+
+    pts1 = np.array([top_left, bottom_left, top_right, bottom_right], dtype=np.float32)
+    pts2 = np.array([[0,0], [0,480], [640,0], [640,480]], dtype=np.float32)
+
+    matrix = cv2.getPerspectiveTransform(pts1, pts2)
+    transformed_image = cv2.warpPerspective(image, matrix, (640, 480))
+    
+    if show == True:
+        cv2.imshow("Perspective", transformed_image)
+    
+    return transformed_image
+        
+sh = True
 video = True
 
 # RESİM BAŞLANGIÇ
 if video == False:
-    image = cv2.imread("utils/img/test_image.jpg")
+    image = cv2.imread("utils/img/test_image02.jpg")
     lane_image = np.copy(image)
     image_masked = masked_image(lane_image, show=sh)
-    
     canny_image = canny(image_masked, show=sh)
-    cropped_image = region_of_interest(canny_image, show=sh)
+    perspective_image = perspective_transform(canny_image, show=sh)
+    cropped_image = region_of_interest(perspective_image, show=sh)
     lines = detect_lines(cropped_image)
     averaged_line = average_slope_intercept(lane_image, lines)
     print("LANE : " , averaged_line)
@@ -261,7 +282,8 @@ if video == False:
 
     # ROI bölgesini çizme
     if sh == False:
-        vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
+        vertices = np.array([[(0, 240), (108, 100), (555, 100), (640, 248)]], dtype=np.int32)
+        #vertices = np.array([[(25, 360), (160, 261), (460, 261), (540, 360)]], dtype=np.int32)
         cv2.polylines(combo_image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
     
     cv2.imshow("combo_image", combo_image)
@@ -279,7 +301,8 @@ else:
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         frame_masked = masked_image(frame_hsv, show= sh)
         canny_frame = canny(frame_masked, show= sh)
-        cropped_frame = region_of_interest(canny_frame, show=sh)
+        frame_perspective = perspective_transform(canny_frame, show=sh)
+        cropped_frame = region_of_interest(frame_perspective, show=sh)
         lines = detect_lines(cropped_frame)
         averaged_line = average_slope_intercept(frame, lines)
         line_frame = display_lines(frame, averaged_line)
