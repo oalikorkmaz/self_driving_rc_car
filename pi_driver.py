@@ -1,4 +1,5 @@
 from lanes import *
+from ultrasonic_sensor import *
 import cv2
 import RPi.GPIO as GPIO
 import pigpio
@@ -17,6 +18,12 @@ picam2.start()
 Ena = 26
 In1 = 6
 In2 = 5
+TRIG_RIGHT = 10
+ECHO_RIGHT = 25
+TRIG_MID = 9
+ECHO_MID = 8
+TRIG_LEFT = 11
+ECHO_LEFT = 7
 
 # servo pin
 servo = 12
@@ -27,6 +34,13 @@ GPIO.setwarnings(False)
 GPIO.setup(Ena, GPIO.OUT)
 GPIO.setup(In1, GPIO.OUT)
 GPIO.setup(In2, GPIO.OUT)
+
+GPIO.setup(TRIG_RIGHT, GPIO.OUT)
+GPIO.setup(ECHO_RIGHT, GPIO.IN)
+GPIO.setup(TRIG_MID, GPIO.OUT)
+GPIO.setup(ECHO_MID, GPIO.IN)
+GPIO.setup(TRIG_LEFT, GPIO.OUT)
+GPIO.setup(ECHO_LEFT, GPIO.IN)
 
 #pwmA'nın hız kontrolü
 pwmA = GPIO.PWM(Ena, 100)
@@ -63,7 +77,6 @@ steering_factor = 1
 
 def main():
     th = 0
-
     while True:
         cam = picam2.capture_array()
 
@@ -109,6 +122,16 @@ def main():
             steering_last_five.pop(0)
 
         st = int(sum(steering_last_five) / len(steering_last_five))
+
+
+
+        dist_right = measure_distance(TRIG_RIGHT, ECHO_RIGHT)
+        dist_mid = measure_distance(TRIG_MID, ECHO_MID)
+        dist_left = measure_distance(TRIG_LEFT, ECHO_LEFT)
+
+
+        if(dist_right or dist_mid or dist_left <= 12):
+            pwmA.ChangeDutyCycle(0)
 
         # sadece bir şerit çizgisi tespit edilirse, aracın sert bir şekilde sağa veya sola gitmesi gerektiği anlamına gelir    
         # ayrıca steering_angle() sadece bir şerit varsa tek şeridin eğimini döndürür.
