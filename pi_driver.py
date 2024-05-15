@@ -1,29 +1,15 @@
 from lanes import *
-from ultrasonic_sensor import *
 import cv2
 import RPi.GPIO as GPIO
 import pigpio
 from picamera2 import Picamera2
 
-
-
 picam2 = Picamera2()
-picam2.preview_configuration.main.size = (1920,1080)
+picam2.preview_configuration.main.size = (4608, 2592)
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
 picam2.configure("preview")
 picam2.start()
-
-# motor sürücü pinleri
-Ena = 26
-In1 = 6
-In2 = 5
-TRIG_RIGHT = 10
-ECHO_RIGHT = 25
-TRIG_MID = 9
-ECHO_MID = 8
-TRIG_LEFT = 11
-ECHO_LEFT = 7
 
 # servo pin
 servo = 12
@@ -31,20 +17,6 @@ servo = 12
 #GPIO Setup
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(Ena, GPIO.OUT)
-GPIO.setup(In1, GPIO.OUT)
-GPIO.setup(In2, GPIO.OUT)
-
-GPIO.setup(TRIG_RIGHT, GPIO.OUT)
-GPIO.setup(ECHO_RIGHT, GPIO.IN)
-GPIO.setup(TRIG_MID, GPIO.OUT)
-GPIO.setup(ECHO_MID, GPIO.IN)
-GPIO.setup(TRIG_LEFT, GPIO.OUT)
-GPIO.setup(ECHO_LEFT, GPIO.IN)
-
-#pwmA'nın hız kontrolü
-pwmA = GPIO.PWM(Ena, 100)
-pwmA.start(0)
 
 # servo setup
 pwm = pigpio.pi()
@@ -122,15 +94,6 @@ def main():
             steering_last_five.pop(0)
 
         st = int(sum(steering_last_five) / len(steering_last_five))
-
-
-
-        dist_right = measure_distance(TRIG_RIGHT, ECHO_RIGHT)
-        dist_mid = measure_distance(TRIG_MID, ECHO_MID)
-        dist_left = measure_distance(TRIG_LEFT, ECHO_LEFT)
-
-
-       
 
         # sadece bir şerit çizgisi tespit edilirse, aracın sert bir şekilde sağa veya sola gitmesi gerektiği anlamına gelir    
         # ayrıca steering_angle() sadece bir şerit varsa tek şeridin eğimini döndürür.
