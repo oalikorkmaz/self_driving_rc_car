@@ -130,8 +130,7 @@ def main():
         dist_left = measure_distance(TRIG_LEFT, ECHO_LEFT)
 
 
-        if(dist_right or dist_mid or dist_left <= 12):
-            pwmA.ChangeDutyCycle(0)
+       
 
         # sadece bir şerit çizgisi tespit edilirse, aracın sert bir şekilde sağa veya sola gitmesi gerektiği anlamına gelir    
         # ayrıca steering_angle() sadece bir şerit varsa tek şeridin eğimini döndürür.
@@ -167,6 +166,9 @@ def main():
             throttle_input = 0
         if throttle_input > 100:
             throttle_input = 100
+        
+        if(dist_right or dist_mid or dist_left <= 12):
+            pwmA.ChangeDutyCycle(0)
             
         pwmA.ChangeDutyCycle(int(throttle_input))
 

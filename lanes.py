@@ -162,11 +162,13 @@ def steering_angle(image, lane, show=False):
     
     height = image.shape[0]
     width = image.shape[1]
+    center_x = width / 2
 
     if len(lane) == 1:
         x1, y1, x2, y2 = lane[0][0]
-        slope = x2 - x1
-        x_deviation = slope
+        #slope = x2 - x1
+        #x_deviation = slope
+        x_deviation = center_x - x2
     else:
         l1x1, l1y1, l1x2, l1y2 = lane[0][0]
         l2x1, l2y1, l2x2, l2y2 = lane[1][0]
@@ -175,10 +177,10 @@ def steering_angle(image, lane, show=False):
         # Yön devamı hesaplama
         x_deviation = average_point - width / 2
 
-        if show:
-            steering_img = cv2.circle(image, (average_point, int(height/2)), radius=3, color=(0, 0, 255), thickness=-1)
-            steering_img = cv2.line(steering_img, (int(width / 2), 0), (int(width / 2), height), (0, 255, 0), 1)
-            cv2.imshow("Sapma (Deviation)", steering_img)
+    if show:
+        steering_img = cv2.circle(image, (average_point, int(height/2)), radius=3, color=(0, 0, 255), thickness=-1)
+        steering_img = cv2.line(steering_img, (int(width / 2), 0), (int(width / 2), height), (0, 255, 0), 1)
+        cv2.imshow("Sapma (Deviation)", steering_img)
 
     line_length = int(height / 2)
     angle_to_middle_vertical_rad = math.atan(x_deviation / line_length)
