@@ -198,22 +198,6 @@ def steering_angle(image, lane, show=False):
 
     return steering_angle
 
-# Gruplama alanlarını görsel olarak görme [hata ayıklama için]
-def lane_search_area(image, boundary = 1/2):
-    height = image.shape[0] - 53
-    width = image.shape[1]
-    left_lane_area_width = int(width * (1 - boundary))
-    right_lane_area_width = int(width * boundary)
-    # left_region = np.zeros_like(image)
-    # right_region = np.zeros_like(image)
-
-    cv2.rectangle(image, (0, 0), (left_lane_area_width, height), (0, 244, 233), 5) 
-    cv2.rectangle(image, (right_lane_area_width, 0), (width, height), (128, 0, 0), 5) 
-    vertices = np.array([[(0, 480),(0, 381), (215, 216), (421, 216), (620, 478)]], dtype=np.int32)
-    cv2.polylines(image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
-
-    cv2.imshow("left and right region", image)
-
 def perspective_transform(image, show= False):
     top_left = [108, 100]
     bottom_left = [0, 240]
