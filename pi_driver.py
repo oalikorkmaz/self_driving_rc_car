@@ -41,12 +41,19 @@ def main():
         steering_input_raw = steering_angle(frame, averaged_line, show=sh)
         print("Steering Input Raw", int(steering_input_raw))
 
-        if len(averaged_line) == 2:
-            th += 3
+        if len(averaged_line) == 1:
+            th = th - 25
+            throttle_input = th
+            print("Throttle Down: ", throttle_input)
+        elif len(averaged_line) == 2:
+            th = th + 25
+            throttle_input = th
+            print("Throttle Up: ", throttle_input)
         else:
-            th -= 3
+            throttle_input = 0
+            print("Throttle Stop: ", throttle_input)
 
-        throttle_input = max(0, min(th, 50))  # Gaz değerini 0 ile 50 arasında sınırla
+        throttle_input = max(0, min(th, 125))  # Gaz değerini 0 ile 50 arasında sınırla
         steering_input_raw = max(0, min(steering_input_raw, 180))  # Açıyı 0 ile 180 arasında sınırla
 
         combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
