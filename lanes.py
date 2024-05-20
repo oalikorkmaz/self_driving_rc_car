@@ -94,7 +94,7 @@ def display_lines(image, lines):
     return image
 
 def region_of_interest(image, show=False):
-    vertices = np.array([[(0, 480), (0, 100), (640, 100), (640, 480)]], dtype=np.int32)
+    vertices = np.array([[(18, 442), (140, 143), (480, 143), (600, 442)]], dtype=np.int32)
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, vertices, 255)
     masked_image = cv2.bitwise_and(image, mask)
@@ -114,7 +114,7 @@ def detect_lines(image):
     return lines
 
 def steering_angle(image, lane, show=False):
-    correction_factor = 10  # Adjust this factor based on your camera setup and testing results
+    correction_factor = 14  # Adjust this factor based on your camera setup and testing results
 
     if not lane or not isinstance(lane[0], list):
         print("No lane lines detected.")
@@ -175,7 +175,8 @@ def perspective_transform(image, show=False):
     return transformed_image
         
 sh = True
-video = False
+video = True
+steering_last_five = [0, 0, 0, 0, 0]
 
 # RESİM BAŞLANGIÇ
 if not video:
@@ -183,8 +184,8 @@ if not video:
     lane_image = np.copy(image)
     image_masked = masked_image(lane_image, show=sh)
     #canny_image = canny(image_masked, show=sh)
-    perspective_image = perspective_transform(image_masked, show=sh)
-    cropped_image = region_of_interest(perspective_image, show=sh)
+    #perspective_image = perspective_transform(image_masked, show=sh)
+    cropped_image = region_of_interest(image_masked, show=sh)
     lines = detect_lines(cropped_image)
     averaged_line = average_slope_intercept(lane_image, lines)
     print("LANE: ", averaged_line)
@@ -194,11 +195,11 @@ if not video:
     
     combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
     
-    # plt.imshow(combo_image)
-    # plt.show()
+    plt.imshow(combo_image)
+    plt.show()
 
-    if sh:
-        vertices = np.array([[(0, 480), (0, 100), (640, 100), (640, 480)]], dtype=np.int32)
+    if True:
+        vertices = np.array([[(18, 442), (140, 143), (480, 143), (600, 442)]], dtype=np.int32)
         cv2.polylines(combo_image, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
     
     cv2.imshow("combo_image", combo_image)
@@ -214,17 +215,20 @@ else:
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         frame_masked = masked_image(frame_hsv, show=sh)
         #canny_frame = canny(frame_masked, show=sh)
-        frame_perspective = perspective_transform(frame_masked, show=sh)
-        cropped_frame = region_of_interest(frame_perspective, show=sh)
+        #frame_perspective = perspective_transform(frame_masked, show=sh)
+        cropped_frame = region_of_interest(frame_masked, show=sh)
         lines = detect_lines(cropped_frame)
         averaged_line = average_slope_intercept(frame, lines)
         line_frame = display_lines(frame, averaged_line)
     
         steering = steering_angle(frame, averaged_line, show=False)
-        print("Teker Açısı: ", steering)
+        steering_last_five.insert(0, steering)
+        average_steering = int(sum(steering_last_five)/len(steering_last_five))
+
+        print("Teker Açısı: ", average_steering)
         combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
         if sh:
-            vertices = np.array([[(0, 480), (0, 100), (640, 100), (640, 480)]], dtype=np.int32)
+            vertices = np.array([[(18, 442), (140, 143), (480, 143), (600, 442)]], dtype=np.int32)
             cv2.polylines(combo_frame, vertices, isClosed=True, color=(0, 255, 0), thickness=2)
         cv2.imshow("combo_frame", combo_frame)
 
