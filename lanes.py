@@ -26,19 +26,19 @@ def average_slope_intercept(image, lines):
     right_lane_area_width = width * boundary
 
     for line in lines:
-        x1, x2, y1, y2 = line.reshape(4)
-        if x1 == x2:
-            continue
-        parameters = np.polyfit((x1, x2), (y1, y2), 1)
-        slope = parameters[0]
-        intercept = parameters[1]
+        for x1, x2, y1, y2 in line: 
+            if x1 == x2:
+                continue
+            parameters = np.polyfit((x1, x2), (y1, y2), 1)
+            slope = parameters[0]
+            intercept = parameters[1]
 
-        if slope < 0:
-            if x1 < left_lane_area_width and x2 < left_lane_area_width:
-                left_fit.append((slope, intercept))
-        else:
-            if x1 > right_lane_area_width and x2 > right_lane_area_width:
-                right_fit.append((slope, intercept))
+            if slope < 0:
+                if x1 < left_lane_area_width and x2 < left_lane_area_width:
+                    left_fit.append((slope, intercept))
+            else:
+                if x1 > right_lane_area_width and x2 > right_lane_area_width:
+                    right_fit.append((slope, intercept))
     
     if len(left_fit) > 0:
         left_fit_average = np.average(left_fit, axis=0)
@@ -109,13 +109,12 @@ def detect_lines(image):
     min_threshold = 10
     min_line_length = 20
     max_line_gap = 4
-
     lines = cv2.HoughLinesP(image, rho, theta, min_threshold, np.array([]), min_line_length, max_line_gap)
 
     return lines
 
 def steering_angle(image, lane, show=False):
-    correction_factor = 14  # Adjust this factor based on your camera setup and testing results
+    correction_factor = 10  # Adjust this factor based on your camera setup and testing results
 
     if not lane or not isinstance(lane[0], list):
         print("No lane lines detected.")
@@ -176,15 +175,15 @@ def perspective_transform(image, show=False):
     return transformed_image
         
 sh = True
-video = True
+video = False
 
 # RESİM BAŞLANGIÇ
 if not video:
     image = cv2.imread("utils/img/test_image.jpg")
     lane_image = np.copy(image)
     image_masked = masked_image(lane_image, show=sh)
-    canny_image = canny(image_masked, show=sh)
-    perspective_image = perspective_transform(canny_image, show=sh)
+    #canny_image = canny(image_masked, show=sh)
+    perspective_image = perspective_transform(image_masked, show=sh)
     cropped_image = region_of_interest(perspective_image, show=sh)
     lines = detect_lines(cropped_image)
     averaged_line = average_slope_intercept(lane_image, lines)
@@ -195,8 +194,8 @@ if not video:
     
     combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
     
-    plt.imshow(combo_image)
-    plt.show()
+    # plt.imshow(combo_image)
+    # plt.show()
 
     if sh:
         vertices = np.array([[(0, 480), (0, 100), (640, 100), (640, 480)]], dtype=np.int32)
@@ -214,8 +213,8 @@ else:
         frame = cv2.resize(frame, (640, 480))
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         frame_masked = masked_image(frame_hsv, show=sh)
-        canny_frame = canny(frame_masked, show=sh)
-        frame_perspective = perspective_transform(canny_frame, show=sh)
+        #canny_frame = canny(frame_masked, show=sh)
+        frame_perspective = perspective_transform(frame_masked, show=sh)
         cropped_frame = region_of_interest(frame_perspective, show=sh)
         lines = detect_lines(cropped_frame)
         averaged_line = average_slope_intercept(frame, lines)
