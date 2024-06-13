@@ -18,20 +18,20 @@ picam2.start()
 ser = serial.Serial('/dev/ttyUSB0', 9600)
 
 def main():
-    sh = False
+    sh = True
     throttle_input = 1
     while True:
         cam = picam2.capture_array()
         frame = cv2.resize(cam, (640, 480))
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        frame_masked = masked_image(frame_hsv, sh)
-        #frame_canny = canny(frame_masked, sh)
-        frame_roi = region_of_interest(frame_masked, sh)
+        frame_masked = masked_image(frame_hsv, False)
+        frame_canny = canny(frame_masked, False)
+        frame_roi = region_of_interest(frame_canny, sh)
         lines = detect_lines(frame_roi)
         averaged_line = average_slope_intercept(frame, lines)
         line_frame = display_lines(frame, averaged_line)
-        steering = steering_angle(frame, averaged_line, show=sh)
-        ser.write(f"{int(steering)},{int(throttle_input)}\n".encode())
+        steering = steering_angle(frame, averaged_line, show=True)
+        ser.write(f"{int(steering)}\n".encode())
         print("Steering", int(steering))
         combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
         cv2.imshow('Result', combo_frame)
