@@ -147,7 +147,7 @@ def make_coordinates(image, line):
 
     return [[x1, y1, x2, y2]]
 
-def steering_angle(image, lane, show):
+def steering_angle(image, lane, show=False):
     try:
         height = image.shape[0]
         width = image.shape[1]
@@ -161,14 +161,8 @@ def steering_angle(image, lane, show):
         elif len(lane) == 2:
             l1x1, l1y1, l1x2, l1y2 = lane[0][0]
             l2x1, l2y1, l2x2, l2y2 = lane[1][0]
-            avg_x1 = int((l1x1 + l2x1) / 2)
-            avg_y1 = int((l1y1 + l2y1) / 2)
-            avg_x2 = int((l1x2 + l2x2) / 2)
-            avg_y2 = int((l1y2 + l2y2) / 2)
-            cv2.line(image, (avg_x1, avg_y1), (avg_x2, avg_y2), (0, 0, 255), 3)
-            if show:
-                cv2.imshow("Mid Line", image)
-            
+            average_point = (l1x2 + l2x2) / 2
+            x_deviation = int(average_point) - (center_x)
         else:
             raise ValueError("No Lane detected")
 
@@ -177,12 +171,21 @@ def steering_angle(image, lane, show):
         if line_length == 0:
             raise ZeroDivisionError("Height of the image results in line_length being zero")
 
-        # Açı hesaplama
-        dx = avg_x2 - avg_x1
-        dy = avg_y2 - avg_y1
-        steering = math.degrees(math.atan2(dy, dx))
-        steering = int(steering)
-        print(f"Çizginin X eksenine göre açısı: {steering} derece")
+        angle_to_middle_vertical_rad = math.atan(x_deviation / line_length)
+        angle_to_middle_vertical_deg = int(angle_to_middle_vertical_rad * 180.0 / math.pi)
+        steering = angle_to_middle_vertical_deg + 90
+
+        if show:
+            
+            steering_img = cv2.line(image, (center_x, 0), (center_x, height), (0, 255, 0), 1)
+            
+            red_point_x = center_x + x_deviation + calibration_offset
+            steering_img = cv2.circle(steering_img, (red_point_x, int(height / 2)), radius=3, color=(0, 0, 255), thickness=-1)
+            cv2.imshow("Deviation", steering_img)
+            
+        cv2.line(image, (int(width/2), height),
+             (int(x_deviation + center_x), int(height/2)), (255, 255, 0), 5)
+
         return steering
 
     except ValueError as e:
@@ -219,55 +222,55 @@ def perspective_transform(image, show):
     
     return transformed_image
 
-sh = True
+sh = False
 video = False
 
-# RESİM BAŞLANGIÇ
-if not video:
-    image = cv2.imread("utils/img/test_image.jpg")
-    image = cv2.resize(image, (640, 480))
-    image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    image_masked = masked_image(image_hsv, show=sh)
-    canny_image = canny(image_masked, show=sh)
-    #perspective_image = perspective_transform(canny_image, show=sh)
-    roi_image = region_of_interest(canny_image, show=sh)
-    lines = detect_lines(roi_image)
-    averaged_line = average_slope_intercept(image, lines)
-    line_image = display_lines(image, averaged_line)
-    steering = steering_angle(image, averaged_line, show=False)
-    print("Teker Açısı: ", steering)
+# # RESİM BAŞLANGIÇ
+# if not video:
+    # image = cv2.imread("utils/img/test_image.jpg")
+    # image = cv2.resize(image, (640, 480))
+    # image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # image_masked = masked_image(image_hsv, show=sh)
+    # canny_image = canny(image_masked, show=sh)
+    # #perspective_image = perspective_transform(canny_image, show=sh)
+    # roi_image = region_of_interest(canny_image, show=sh)
+    # lines = detect_lines(roi_image)
+    # averaged_line = average_slope_intercept(image, lines)
+    # line_image = display_lines(image, averaged_line)
+    # steering = steering_angle(image, averaged_line, show=False)
+    # print("Teker Açısı: ", steering)
     
-    combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
+    # combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
     
-    # plt.imshow(combo_image)
-    # plt.show()
+    # # plt.imshow(combo_image)
+    # # plt.show()
 
-    cv2.imshow("combo_image", combo_image)
-    cv2.waitKey(0)
+    # cv2.imshow("combo_image", combo_image)
+    # cv2.waitKey(0)
 
-# VİDEO BAŞLANGIÇ
-else:
-    cap = cv2.VideoCapture("utils/video/test_video.mp4")
+# # VİDEO BAŞLANGIÇ
+# else:
+    # cap = cv2.VideoCapture("utils/video/test_video.mp4")
 
-    while cap.isOpened():
-        _, frame = cap.read()
-        frame = cv2.resize(frame, (640, 480))
-        frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        frame_masked = masked_image(frame_hsv, show=sh)
-        #canny_frame = canny(frame_masked, show=sh)
-        #frame_perspective = perspective_transform(frame_masked, show=sh)
-        frame_roi = region_of_interest(frame_masked, show=sh)
-        lines = detect_lines(frame_roi)
-        averaged_line = average_slope_intercept(frame, lines)
-        line_frame = display_lines(frame, averaged_line)
+    # while cap.isOpened():
+        # _, frame = cap.read()
+        # frame = cv2.resize(frame, (640, 480))
+        # frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        # frame_masked = masked_image(frame_hsv, show=sh)
+        # #canny_frame = canny(frame_masked, show=sh)
+        # #frame_perspective = perspective_transform(frame_masked, show=sh)
+        # frame_roi = region_of_interest(frame_masked, show=sh)
+        # lines = detect_lines(frame_roi)
+        # averaged_line = average_slope_intercept(frame, lines)
+        # line_frame = display_lines(frame, averaged_line)
     
-        steering = steering_angle(frame, averaged_line, show=False)
-        print("Teker Açısı: ", steering)
+        # steering = steering_angle(frame, averaged_line, show=False)
+        # print("Teker Açısı: ", steering)
 
-        combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+        # combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
 
-        cv2.imshow("combo_frame", combo_frame)
+        # cv2.imshow("combo_frame", combo_frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        time.sleep(0.1)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+            # break
+        # time.sleep(0.1)

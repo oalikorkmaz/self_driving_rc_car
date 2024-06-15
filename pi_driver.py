@@ -3,6 +3,7 @@ import cv2
 import RPi.GPIO as GPIO
 import pigpio
 from picamera2 import Picamera2
+from libcamera import Transform
 import serial
 import time
 
@@ -19,7 +20,7 @@ ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1.0)
 time.sleep(3)
 ser.reset_input_buffer()
 def main():
-    sh = True
+    sh = False
     throttle_input = 1
 
     try:
@@ -29,11 +30,12 @@ def main():
             frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             frame_masked = masked_image(frame_hsv, False)
             frame_canny = canny(frame_masked, False)
-            frame_roi = region_of_interest(frame_canny, sh)
+            perspective_image = perspective_transform(frame_canny, show=sh)
+            frame_roi = region_of_interest(perspective_image, sh)
             lines = detect_lines(frame_roi)
             averaged_line = average_slope_intercept(frame, lines)
             line_frame = display_lines(frame, averaged_line)
-            steering = steering_angle(frame, averaged_line, show=True)
+            steering = steering_angle(frame, averaged_line, show=False)
             ser.write(f"{int(steering)}\n".encode('utf-8'))
             print("Steering", int(steering))
             combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
