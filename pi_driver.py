@@ -38,7 +38,8 @@ def main():
             steering = steering_angle(frame, averaged_line, show=False)
             ser.write(f"{int(steering)}\n".encode('utf-8'))
             print("Steering", int(steering))
-            combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+            yolo_model = yolo_detect(frame, model)
+            combo_frame = cv2.addWeighted(yolo_model, 0.8, line_frame, 1, 1)
             cv2.imshow('Result', combo_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import math
+from ultralytics import YOLO
 
 def masked_image(image, show):  # H  S  V
     lower_thr = np.array([0, 0, 0])
@@ -179,7 +180,7 @@ def steering_angle(image, lane, show=False):
             
             steering_img = cv2.line(image, (center_x, 0), (center_x, height), (0, 255, 0), 1)
             
-            red_point_x = center_x + x_deviation + calibration_offset
+            red_point_x = center_x + x_deviation
             steering_img = cv2.circle(steering_img, (red_point_x, int(height / 2)), radius=3, color=(0, 0, 255), thickness=-1)
             cv2.imshow("Deviation", steering_img)
             
@@ -222,31 +223,55 @@ def perspective_transform(image, show):
     
     return transformed_image
 
+
+def yolo_detect(frame, model):
+    results = model(frame)
+    annotated_frame = frame.copy()
+
+    for result in results:
+        boxes = result.boxes.xyxy.numpy()
+        confidences = result.boxes.conf.numpy()
+        class_ids = result.boxes.cls.numpy()
+
+        for box, confidence, class_id in zip(boxes, confidences, class_ids):
+            x1, y1, x2, y2 = map(int, box)
+            label = f'{model.names[int(class_id)]} {confidence:.2f}'
+            cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(annotated_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # Nesne adlarını yazdır
+            print(f"Detected: {model.names[int(class_id)]} with confidence {confidence:.2f}")
+
+    return annotated_frame
+
 sh = False
 video = False
+model = YOLO('best.pt')
 
 # # RESİM BAŞLANGIÇ
 # if not video:
-    # image = cv2.imread("utils/img/test_image.jpg")
-    # image = cv2.resize(image, (640, 480))
-    # image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    # image_masked = masked_image(image_hsv, show=sh)
-    # canny_image = canny(image_masked, show=sh)
-    # #perspective_image = perspective_transform(canny_image, show=sh)
-    # roi_image = region_of_interest(canny_image, show=sh)
-    # lines = detect_lines(roi_image)
-    # averaged_line = average_slope_intercept(image, lines)
-    # line_image = display_lines(image, averaged_line)
-    # steering = steering_angle(image, averaged_line, show=False)
-    # print("Teker Açısı: ", steering)
-    
-    # combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
-    
-    # # plt.imshow(combo_image)
-    # # plt.show()
+#     image = cv2.imread("utils/img/test_image.jpg")
+#     image = cv2.resize(image, (640, 480))
+#     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+#     image_masked = masked_image(image_hsv, show=sh)
+#     canny_image = canny(image_masked, show=sh)
+#     #perspective_image = perspective_transform(canny_image, show=sh)
+#     roi_image = region_of_interest(canny_image, show=sh)
+#     lines = detect_lines(roi_image)
+#     averaged_line = average_slope_intercept(image, lines)
+#     line_image = display_lines(image, averaged_line)
+#     steering = steering_angle(image, averaged_line, show=False)
+#     print("Teker Açısı: ", steering)
+#     yolo_image = yolo_detect(image, model)
 
-    # cv2.imshow("combo_image", combo_image)
-    # cv2.waitKey(0)
+#     combo_image = cv2.addWeighted(yolo_image, 0.8, line_image, 1, 1)
+
+#     #combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
+    
+#     # plt.imshow(combo_image)
+#     # plt.show()
+
+#     cv2.imshow("combo_image", combo_image)
+#     cv2.waitKey(0)
 
 # # VİDEO BAŞLANGIÇ
 # else:
