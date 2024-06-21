@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import math
-from ultralytics import YOLO
 
 def masked_image(image, show):  # H  S  V
     lower_thr = np.array([0, 0, 0])
@@ -245,7 +244,6 @@ def yolo_detect(frame, model):
 
 sh = False
 video = False
-model = YOLO('best.pt')
 
 # # RESİM BAŞLANGIÇ
 # if not video:

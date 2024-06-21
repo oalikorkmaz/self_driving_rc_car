@@ -19,14 +19,25 @@ picam2.start()
 ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1.0)
 time.sleep(3)
 ser.reset_input_buffer()
+
+
+
 def main():
     sh = False
     throttle_input = 1
+    pos=(20, 60)
+    font=cv2.FONT_HERSHEY_SIMPLEX
 
+    height = 1.5
+    weight = 3
+    myColor=(255,0,0)
+
+    fps = 0
+    tStart = time.time()
     try:
         while True:
-            cam = picam2.capture_array()
-            frame = cv2.resize(cam, (640, 480))
+            frame = picam2.capture_array()
+            frame = cv2.resize(frame, (640, 480))
             frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             frame_masked = masked_image(frame_hsv, False)
             frame_canny = canny(frame_masked, False)
@@ -38,12 +49,18 @@ def main():
             steering = steering_angle(frame, averaged_line, show=False)
             ser.write(f"{int(steering)}\n".encode('utf-8'))
             print("Steering", int(steering))
-            yolo_model = yolo_detect(frame, model)
-            combo_frame = cv2.addWeighted(yolo_model, 0.8, line_frame, 1, 1)
+            cv2.putText(frame, str(int(fps)) + 'FPS', pos, font, height, myColor, weight)
+            combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+            
             cv2.imshow('Result', combo_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            
+            tEnd=time.time()
+            loopTime = tEnd - tStart
+            fps = .9*fps + .1*1/loopTime
+            tStart=time.time()
 
         cam.release()
         cv2.destroyAllWindows()
