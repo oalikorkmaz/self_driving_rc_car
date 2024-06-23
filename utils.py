@@ -59,7 +59,7 @@ def visualize(
     if category_name in class_name_mapping:
         category_name = class_name_mapping[category_name]
     probability = round(category.score, 2)
-    result_text = category_name + ' (' + str(probability) + ')'
+    result_text = category_name
     result_texts.append(result_text)
     text_location = (_MARGIN + bbox.origin_x,
                      _MARGIN + _ROW_SIZE + bbox.origin_y)

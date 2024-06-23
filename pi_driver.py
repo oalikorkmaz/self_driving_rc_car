@@ -41,6 +41,7 @@ def main():
     tStart = time.time()
     model = 'sign.tflite'
     num_threads = 4
+    text=""
 
     base_options = core.BaseOptions(file_name=model, use_coral=False, num_threads=num_threads)
     detection_options = processor.DetectionOptions(max_results=4, score_threshold=0.3)
@@ -68,11 +69,10 @@ def main():
             frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frameTensor = vision.TensorImage.create_from_array(frameRGB)
             detections = detector.detect(frameTensor)
-            image, result_text = utils.visualize(frame, detections)
+            image, result_texts = utils.visualize(frame, detections)
             
-            for text in result_text:
-                print(text)
             
+            text = result_texts[0] if result_texts else "none"
             ser.write(f"{int(steering)}, {text}\n".encode('utf-8'))
             print("Steering", int(steering))
             combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
