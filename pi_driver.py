@@ -1,3 +1,4 @@
+
 import cv2
 import RPi.GPIO as GPIO
 import pigpio
@@ -61,16 +62,19 @@ def main():
             averaged_line = average_slope_intercept(frame, lines)
             line_frame = display_lines(frame, averaged_line)
             steering = steering_angle(frame, averaged_line, show=False)
-            ser.write(f"{int(steering)}\n".encode('utf-8'))
-            print("Steering", int(steering))
             cv2.putText(frame, str(int(fps)) + 'FPS', pos, font, height, myColor, weight)
             
 
             frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frameTensor = vision.TensorImage.create_from_array(frameRGB)
             detections = detector.detect(frameTensor)
-            image = utils.visualize(frame, detections)
+            image, result_text = utils.visualize(frame, detections)
             
+            for text in result_text:
+                print(text)
+            
+            ser.write(f"{int(steering)}, {text}\n".encode('utf-8'))
+            print("Steering", int(steering))
             combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
             cv2.imshow('Result', combo_frame)
 

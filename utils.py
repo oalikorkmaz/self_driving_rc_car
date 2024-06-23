@@ -24,19 +24,28 @@ _FONT_THICKNESS = 1
 _TEXT_COLOR = (0, 0, 255)  # red
 
 
+
 def visualize(
     image: np.ndarray,
     detection_result: processor.DetectionResult,
-) -> np.ndarray:
-  """Draws bounding boxes on the input image and return it.
+) -> (np.ndarray, list):
+  """Draws bounding boxes on the input image and returns it along with result texts.
 
   Args:
     image: The input RGB image.
     detection_result: The list of all "Detection" entities to be visualize.
 
   Returns:
-    Image with bounding boxes.
+    Image with bounding boxes and a list of result texts.
   """
+  result_texts = []
+  class_name_mapping = {
+      "-": "red",
+      "Roboflow is an end-to-end computer vision platform that helps you": "stop",
+      "This dataset was exported via roboflow.com on June 28- 2023 at 4-46 PM GMT": "orange",
+      "lighttraffic1 - v10 2023-05-16 12-32pm": "green",
+      
+  }
   for detection in detection_result.detections:
     # Draw bounding_box
     bbox = detection.bounding_box
@@ -47,11 +56,15 @@ def visualize(
     # Draw label and score
     category = detection.categories[0]
     category_name = category.category_name
+    if category_name in class_name_mapping:
+        category_name = class_name_mapping[category_name]
     probability = round(category.score, 2)
     result_text = category_name + ' (' + str(probability) + ')'
+    result_texts.append(result_text)
     text_location = (_MARGIN + bbox.origin_x,
                      _MARGIN + _ROW_SIZE + bbox.origin_y)
     cv2.putText(image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                 _FONT_SIZE, _TEXT_COLOR, _FONT_THICKNESS)
 
-  return image
+  return image, result_texts
+
