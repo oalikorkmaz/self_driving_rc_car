@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>296_png_jpg.rf.1e6b9077c6e3222d67c81b92af061b04.jpg</filename>
+	<path>296_png_jpg.rf.1e6b9077c6e3222d67c81b92af061b04.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>This dataset was exported via roboflow.com on June 28- 2023 at 4-46 PM GMT</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>207</xmin>
+			<xmax>267</xmax>
+			<ymin>257</ymin>
+			<ymax>327</ymax>
+		</bndbox>
+	</object>
+</annotation>

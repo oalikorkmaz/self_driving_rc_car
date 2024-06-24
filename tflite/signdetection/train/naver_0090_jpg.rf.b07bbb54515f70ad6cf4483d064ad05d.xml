@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>naver_0090_jpg.rf.b07bbb54515f70ad6cf4483d064ad05d.jpg</filename>
+	<path>naver_0090_jpg.rf.b07bbb54515f70ad6cf4483d064ad05d.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Roboflow is an end-to-end computer vision platform that helps you</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>252</xmin>
+			<xmax>407</xmax>
+			<ymin>12</ymin>
+			<ymax>267</ymax>
+		</bndbox>
+	</object>
+</annotation>

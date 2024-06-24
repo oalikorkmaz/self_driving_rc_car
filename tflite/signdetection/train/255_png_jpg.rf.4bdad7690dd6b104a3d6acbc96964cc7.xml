@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>255_png_jpg.rf.4bdad7690dd6b104a3d6acbc96964cc7.jpg</filename>
+	<path>255_png_jpg.rf.4bdad7690dd6b104a3d6acbc96964cc7.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>lighttraffic1 - v10 2023-05-16 12-32pm</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>257</xmin>
+			<xmax>330</xmax>
+			<ymin>218</ymin>
+			<ymax>306</ymax>
+		</bndbox>
+	</object>
+</annotation>

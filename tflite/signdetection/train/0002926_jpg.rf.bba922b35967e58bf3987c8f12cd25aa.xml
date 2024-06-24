@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>0002926_jpg.rf.bba922b35967e58bf3987c8f12cd25aa.jpg</filename>
+	<path>0002926_jpg.rf.bba922b35967e58bf3987c8f12cd25aa.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Roboflow is an end-to-end computer vision platform that helps you</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>517</xmin>
+			<xmax>548</xmax>
+			<ymin>202</ymin>
+			<ymax>235</ymax>
+		</bndbox>
+	</object>
+</annotation>

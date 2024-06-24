@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>google_0119_jpg.rf.7656775d49285f3b599eb542242c0aff.jpg</filename>
+	<path>google_0119_jpg.rf.7656775d49285f3b599eb542242c0aff.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Roboflow is an end-to-end computer vision platform that helps you</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>300</xmin>
+			<xmax>565</xmax>
+			<ymin>100</ymin>
+			<ymax>579</ymax>
+		</bndbox>
+	</object>
+</annotation>

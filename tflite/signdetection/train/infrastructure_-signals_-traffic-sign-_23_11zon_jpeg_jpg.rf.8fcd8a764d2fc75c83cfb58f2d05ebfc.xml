@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>infrastructure_-signals_-traffic-sign-_23_11zon_jpeg_jpg.rf.8fcd8a764d2fc75c83cfb58f2d05ebfc.jpg</filename>
+	<path>infrastructure_-signals_-traffic-sign-_23_11zon_jpeg_jpg.rf.8fcd8a764d2fc75c83cfb58f2d05ebfc.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>640</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Roboflow is an end-to-end computer vision platform that helps you</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>117</xmin>
+			<xmax>502</xmax>
+			<ymin>179</ymin>
+			<ymax>477</ymax>
+		</bndbox>
+	</object>
+</annotation>
