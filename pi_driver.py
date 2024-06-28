@@ -75,8 +75,8 @@ def main():
             text = result_texts[0] if result_texts else "none"
             ser.write(f"{int(steering)}, {text}\n".encode('utf-8'))
             print("Steering", int(steering))
-            combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
-            cv2.imshow('Result', combo_frame)
+            heading_image = display_heading_line(line_frame, steering)
+            cv2.imshow("heading line",heading_image)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

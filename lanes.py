@@ -43,8 +43,8 @@ def detect_lines(image):
     rho = 1
     theta = np.pi / 180
     min_threshold = 10
-    min_line_length = 20
-    max_line_gap = 4
+    min_line_length = 5
+    max_line_gap = 150
 
     lines = cv2.HoughLinesP(image, rho, theta, min_threshold, np.array([]), min_line_length, max_line_gap)
 
@@ -86,8 +86,8 @@ def average_slope_intercept(image, lines):
 
             # np.polyfit can be used to get slop and intercept from two points on the line
             coff = np.polyfit((x1, x2), (y1, y2), 1)
-            slope = coff[0]
-            intercept = coff[1]
+            slope = (y2 - y1) / (x2 - x1)
+            intercept = y1 - (slope * x1)
 
             # note that y axis is inverted in matrix of images. 
             # so as x (width) increases, y(height) values decreases
@@ -97,10 +97,10 @@ def average_slope_intercept(image, lines):
             #                                       \
             #                                        \
             #                                         \
-            if slope > 0:
+            if slope < 0:
                 # search area check
-                if x1 > right_lane_area_width and x2 > right_lane_area_width:
-                    right_lane.append((slope, intercept))
+                if x1 < left_lane_area_width and x2 < left_lane_area_width:
+                    left_lane.append((slope, intercept))
 
 
             # negative slop -> left lane marking  /
@@ -108,16 +108,16 @@ def average_slope_intercept(image, lines):
             #                                   /
             #                                  /
             else:
-                if x1 < left_lane_area_width and x2 < left_lane_area_width:
-                    left_lane.append((slope, intercept))
+                if x1 > right_lane_area_width and x2 > right_lane_area_width:
+                    right_lane.append((slope, intercept))
 
     # averaging all the lines in each group to get a single line out of them
     left_avg = np.average(left_lane, axis=0)
-    right_avg = np.average(right_lane, axis=0)
 
-    # if got left lane, convert to point form from intercept form
     if len(left_lane) > 0:
         lane_lines.append(make_coordinates(image, left_avg))
+
+    right_avg = np.average(right_lane, axis=0) 
     if len(right_lane) > 0:
         lane_lines.append((make_coordinates(image, right_avg)))
 
@@ -130,7 +130,7 @@ def make_coordinates(image, line):
     height = image.shape[0]
     width = image.shape[1]
     
-    y1 = int(height / 2)  # middle
+    y1 = height  # middle
     x1 = int((y1 - intercept) / slop)
 
     if x1 < 0:
@@ -138,7 +138,7 @@ def make_coordinates(image, line):
     if x1 > width:
         x1 = width
 
-    y2 = int(height)  # bottom
+    y2 = int(y1 / 2)  # bottom
     x2 = int((y2 - intercept) / slop)
     if x2 < 0:
         x2 = 0
@@ -151,40 +151,27 @@ def steering_angle(image, lane, show=False):
     try:
         height = image.shape[0]
         width = image.shape[1]
-        center_x = width // 2
+
+        if len(lane) == 2:
+            _, _, left_x2, _ = lane[0][0]
+            _, _, right_x2,_ = lane[1][0]
+            mid = int(width / 2)
+            x_offset = (left_x2 + right_x2) / 2 - mid
+            y_offset = int(height / 2)
 
         if len(lane) == 1:
-            x1, y1, x2, y2 = lane[0][0]
-            slope = x2 - x1
-            x_deviation = slope
+            x1, _, x2, _ = lane[0][0]
+            x_offset = x2 - x1
+            y_offset = int(height / 2)
+        
+        if len(lane) == 0:
+            x_offset = 0
+            y_offset = int(height / 2)
 
-        elif len(lane) == 2:
-            l1x1, l1y1, l1x2, l1y2 = lane[0][0]
-            l2x1, l2y1, l2x2, l2y2 = lane[1][0]
-            average_point = (l1x2 + l2x2) / 2
-            x_deviation = int(average_point) - (center_x)
-        else:
-            raise ValueError("No Lane detected")
 
-        line_length = int(height / 2)
-
-        if line_length == 0:
-            raise ZeroDivisionError("Height of the image results in line_length being zero")
-
-        angle_to_middle_vertical_rad = math.atan(x_deviation / line_length)
+        angle_to_middle_vertical_rad = math.atan(x_offset / y_offset)
         angle_to_middle_vertical_deg = int(angle_to_middle_vertical_rad * 180.0 / math.pi)
         steering = angle_to_middle_vertical_deg + 90
-
-        if show:
-            
-            steering_img = cv2.line(image, (center_x, 0), (center_x, height), (0, 255, 0), 1)
-            
-            red_point_x = center_x + x_deviation
-            steering_img = cv2.circle(steering_img, (red_point_x, int(height / 2)), radius=3, color=(0, 0, 255), thickness=-1)
-            cv2.imshow("Deviation", steering_img)
-            
-        cv2.line(image, (int(width/2), height),
-             (int(x_deviation + center_x), int(height/2)), (255, 255, 0), 5)
 
         return steering
 
@@ -198,49 +185,22 @@ def steering_angle(image, lane, show=False):
         print(f"An unexpected error occurred: {e}")
         return 90
     
-
-
-def perspective_transform(image, show):
-    top_left = [108, 100]
-    bottom_left = [0, 240]
-    top_right = [555, 100]
-    bottom_right = [640, 248]
-
-    cv2.circle(image, tuple(top_left), 5, (0,0,255), -1)
-    cv2.circle(image, tuple(bottom_left), 5, (0,0,255), -1)
-    cv2.circle(image, tuple(top_right), 5, (0,0,255), -1)
-    cv2.circle(image, tuple(bottom_right), 5, (0,0,255), -1)
-
-    pts1 = np.array([top_left, bottom_left, top_right, bottom_right], dtype=np.float32)
-    pts2 = np.array([[0,0], [0,480], [640,0], [640,480]], dtype=np.float32)
-
-    matrix = cv2.getPerspectiveTransform(pts1, pts2)
-    transformed_image = cv2.warpPerspective(image, matrix, (640, 480))
+def display_heading_line(frame, steering_angle, line_color=(0, 0, 255), line_width=5 ):
+    heading_image = np.zeros_like(frame)
+    height, width, _ = frame.shape
     
-    if show:
-        cv2.imshow("Perspective", transformed_image)
+    steering_angle_radian = steering_angle / 180.0 * math.pi
     
-    return transformed_image
+    x1 = int(width / 2)
+    y1 = height
+    x2 = int(x1 - height / 2 / math.tan(steering_angle_radian))
+    y2 = int(height / 2)
+    
+    cv2.line(heading_image, (x1, y1), (x2, y2), line_color, line_width)
+    heading_image = cv2.addWeighted(frame, 0.8, heading_image, 1, 1)
+    
+    return heading_image
 
-
-def yolo_detect(frame, model):
-    results = model(frame)
-    annotated_frame = frame.copy()
-
-    for result in results:
-        boxes = result.boxes.xyxy.numpy()
-        confidences = result.boxes.conf.numpy()
-        class_ids = result.boxes.cls.numpy()
-
-        for box, confidence, class_id in zip(boxes, confidences, class_ids):
-            x1, y1, x2, y2 = map(int, box)
-            label = f'{model.names[int(class_id)]} {confidence:.2f}'
-            cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(annotated_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            # Nesne adlarını yazdır
-            print(f"Detected: {model.names[int(class_id)]} with confidence {confidence:.2f}")
-
-    return annotated_frame
 
 sh = False
 video = False
@@ -259,41 +219,42 @@ video = False
 #     line_image = display_lines(image, averaged_line)
 #     steering = steering_angle(image, averaged_line, show=False)
 #     print("Teker Açısı: ", steering)
-#     yolo_image = yolo_detect(image, model)
+#     heading_image = display_heading_line(line_image, steering)
+#     cv2.imshow("heading line",heading_image)
 
-#     combo_image = cv2.addWeighted(yolo_image, 0.8, line_image, 1, 1)
+
+#     #combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
 
 #     #combo_image = cv2.addWeighted(image, 0.8, line_image, 1, 1)
     
 #     # plt.imshow(combo_image)
 #     # plt.show()
 
-#     cv2.imshow("combo_image", combo_image)
+#     #cv2.imshow("combo_image", combo_image)
 #     cv2.waitKey(0)
 
 # # VİDEO BAŞLANGIÇ
 # else:
-    # cap = cv2.VideoCapture("utils/video/test_video.mp4")
+#     cap = cv2.VideoCapture("utils/video/test_video.mp4")
 
-    # while cap.isOpened():
-        # _, frame = cap.read()
-        # frame = cv2.resize(frame, (640, 480))
-        # frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        # frame_masked = masked_image(frame_hsv, show=sh)
-        # #canny_frame = canny(frame_masked, show=sh)
-        # #frame_perspective = perspective_transform(frame_masked, show=sh)
-        # frame_roi = region_of_interest(frame_masked, show=sh)
-        # lines = detect_lines(frame_roi)
-        # averaged_line = average_slope_intercept(frame, lines)
-        # line_frame = display_lines(frame, averaged_line)
+#     while cap.isOpened():
+#         _, frame = cap.read()
+#         frame = cv2.resize(frame, (640, 480))
+#         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+#         frame_masked = masked_image(frame_hsv, show=sh)
+#         #canny_frame = canny(frame_masked, show=sh)
+#         #frame_perspective = perspective_transform(frame_masked, show=sh)
+#         frame_roi = region_of_interest(frame_masked, show=sh)
+#         lines = detect_lines(frame_roi)
+#         averaged_line = average_slope_intercept(frame, lines)
+#         line_frame = display_lines(frame, averaged_line)
     
-        # steering = steering_angle(frame, averaged_line, show=False)
-        # print("Teker Açısı: ", steering)
+#         steering = steering_angle(frame, averaged_line, show=False)
+#         print("Teker Açısı: ", steering)
 
-        # combo_frame = cv2.addWeighted(frame, 0.8, line_frame, 1, 1)
+#         heading_image = display_heading_line(line_frame, steering)
+#         cv2.imshow("heading line",heading_image)
 
-        # cv2.imshow("combo_frame", combo_frame)
-
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-            # break
-        # time.sleep(0.1)
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
+#         time.sleep(0.1)
