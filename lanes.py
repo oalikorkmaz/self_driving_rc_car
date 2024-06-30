@@ -130,8 +130,13 @@ def make_coordinates(image, line):
     height = image.shape[0]
     width = image.shape[1]
     
+    
+    if slop == 0: 
+        slop = 0.1 
+    
     y1 = height  # middle
     x1 = int((y1 - intercept) / slop)
+    
 
     if x1 < 0:
         x1 = 0

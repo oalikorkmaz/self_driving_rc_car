@@ -28,7 +28,7 @@ time.sleep(3)
 ser.reset_input_buffer()
 
 def main():
-    sh = False
+    sh = True
     throttle_input = 1
     pos = (20, 60)
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -39,14 +39,14 @@ def main():
 
     fps = 0
     tStart = time.time()
-    model = 'sign.tflite'
-    num_threads = 4
-    text=""
+    #model = 'sign.tflite'
+    #num_threads = 4
+    #text=""
 
-    base_options = core.BaseOptions(file_name=model, use_coral=False, num_threads=num_threads)
-    detection_options = processor.DetectionOptions(max_results=4, score_threshold=0.3)
-    options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
-    detector = vision.ObjectDetector.create_from_options(options)
+    #base_options = core.BaseOptions(file_name=model, use_coral=False, num_threads=num_threads)
+    #detection_options = processor.DetectionOptions(max_results=4, score_threshold=0.3)
+    #options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
+    #detector = vision.ObjectDetector.create_from_options(options)
 
     try:
         while True:
@@ -66,13 +66,14 @@ def main():
             cv2.putText(frame, str(int(fps)) + 'FPS', pos, font, height, myColor, weight)
             
 
-            frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frameTensor = vision.TensorImage.create_from_array(frameRGB)
-            detections = detector.detect(frameTensor)
-            image, result_texts = utils.visualize(frame, detections)
+            #frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            #frameTensor = vision.TensorImage.create_from_array(frameRGB)
+            #detections = detector.detect(frameTensor)
+            #image, result_texts = utils.visualize(frame, detections)
             
             
-            text = result_texts[0] if result_texts else "none"
+            #text = result_texts[0] if result_texts else "none"
+            text="none"
             ser.write(f"{int(steering)}, {text}\n".encode('utf-8'))
             print("Steering", int(steering))
             heading_image = display_heading_line(line_frame, steering)
