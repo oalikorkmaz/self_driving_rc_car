@@ -1,5 +1,10 @@
 # Self Driving Car
 
+Arduino Code -> main.cpp
+Lane Detection -> lanes.py
+Running Pi and ai -> pi_driver.py
+
+
 ## 1. Opencv
 ### 1.1 Gray
 
